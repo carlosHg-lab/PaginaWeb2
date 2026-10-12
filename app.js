@@ -20,15 +20,14 @@ const ObtenerPeliculas = async () => {
 }
 
 const crearTarjeta = (pelicula) => {
-    // Corregido: release_date (sin 'e' intermedia)
     const { title, release_date, vote_average, poster_path } = pelicula; 
     const año = release_date ? release_date.split('-')[0] : 'N/A';
     const image = poster_path ? `${IMAGE_URL}${poster_path}` : '';
-    const rating = vote_average ? vote_average.toFixed(1) : 'N/A';
+    const rating = (vote_average || vote_average === 0) ? vote_average.toFixed(1) : 'N/A';
     
     return `
         <article class="movie-card">
-            <div class="movie-Card__poster">
+            <div class="movie-card__poster">
                 <img class="movie-card__image" src="${image}" alt="${title}">
                 <span class="movie-card__rating">${rating}</span>
             </div>
@@ -41,8 +40,8 @@ const crearTarjeta = (pelicula) => {
 }
 
 const buscarPeliculas = async (texto) => {
-    if(!texto || texto.trim()===''){
-        return obtenerPeliculas();
+    if (!texto || texto.trim() === '') {
+        return ObtenerPeliculas();
     }
 
     const query = encodeURIComponent(texto.trim());
@@ -57,46 +56,47 @@ const buscarPeliculas = async (texto) => {
     return datos.results;
 }
 
-const searchInput = document.getElemenById('search');
-let timesoutBusqueda=null;
-searchInput.addEventListener('input',(evento)=>{
-    const texto=evento.target.value;
-        clearTimeout(timesoutBusqueda);
-        timesoutBusqueda=setTimeout(async()=>{
-            console.log(`Buscando películas con el texto: ${texto}`);
-            mostrarLoading();
-            try{
-                const peliculas=await buscarPeliculas(texto);
-                ocultarLoading();
-                if(peliculas.length===0){
-                    moviesgrid.innerHTML=`<p>No se encontraron películas: ${texto}</p>`;
-                    return;
-                }
-                moviesgrid.innerHTML=peliculas.map(crearTarjeta).join('');
-                console.log(`${peliculas.length} resultados: ${texto}`);
-            }catch(error){
-                console.error('Error al buscar:',error);
-                mostrarError('Error al buscar películas. Intenta de nuevo');
+const searchInput = document.getElementById('search');
+let timeoutBusqueda = null;
+
+searchInput.addEventListener('input', (evento) => {
+    const texto = evento.target.value;
+    clearTimeout(timeoutBusqueda);
+    timeoutBusqueda = setTimeout(async () => {
+        console.log(`Buscando películas con el texto: ${texto}`);
+        mostrarLoading();
+        try {
+            const peliculas = await buscarPeliculas(texto);
+            ocultarLoading();
+            if (!peliculas || peliculas.length === 0) {
+                moviesgrid.innerHTML = `<p>No se encontraron películas: ${texto}</p>`;
+                return;
             }
-        },500);
-    });
+            moviesgrid.innerHTML = peliculas.map(crearTarjeta).join('');
+            console.log(`${peliculas.length} resultados: ${texto}`);
+        } catch (error) {
+            console.error('Error al buscar:', error);
+            mostrarError('Error al buscar películas. Intenta de nuevo');
+        }
+    }, 500);
+});
+
 const mostrarLoading = () => {
     loadingDiv.style.display = 'flex';
     errorDiv.style.display = 'none';
     moviesgrid.innerHTML = '';
 }
 
-const consultarLoading = () => {
+const ocultarLoading = () => {
     loadingDiv.style.display = 'none';
 }
 
 const mostrarError = (mensaje) => {
-    consultarLoading();
-    errorMessage.textContent = mensaje; // Corregido: textContent
+    ocultarLoading();
+    errorMessage.textContent = mensaje;
     errorDiv.style.display = 'flex';
     moviesgrid.innerHTML = '';
 }
-
 
 const iniciar = async () => {
     console.log('Mostrar película');
@@ -104,10 +104,10 @@ const iniciar = async () => {
     try {
         const peliculas = await ObtenerPeliculas();
         console.log(`${peliculas.length} películas obtenidas`);
-        consultarLoading();
+        ocultarLoading();
         moviesgrid.innerHTML = peliculas.map(crearTarjeta).join('');
         console.log('Películas renderizadas con éxito');
-    } catch (error) { // Corregido: incluir (error)
+    } catch (error) {
         console.error('Error al cargar:', error);
         let mensaje = 'No se pudo cargar películas';
         
@@ -119,7 +119,7 @@ const iniciar = async () => {
             mensaje = 'Error de conexión. Revisa tu internet';
         }
         
-        mostrarError(mensaje); // Corregido: pasar parámetro mensaje
+        mostrarError(mensaje);
     }
 }
 
