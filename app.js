@@ -4,7 +4,7 @@ const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const themeToggle = document.getElementById('theme-toggle');
 const toggleTheme =() => {
-    const temaActual = document.body.classList.getAttribute('data-theme');
+    const temaActual = document.body.getAttribute('data-theme');
     if(temaActual==='dark'){
         document.body.removeAttribute('data-theme');
         console.log('Tema cambiado a claro');
@@ -12,7 +12,8 @@ const toggleTheme =() => {
         document.body.setAttribute('data-theme','dark');
         console.log('Tema cambiado a oscuro');
     }
-}
+};
+
 themeToggle.addEventListener('click', toggleTheme);
 console.log('Tema inicializado');
 
