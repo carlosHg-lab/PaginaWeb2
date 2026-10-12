@@ -3,11 +3,18 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const themeToggle = document.getElementById('theme-toggle');
-themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('dark-theme');
-    const isDarkTheme = document.body.classList.contains('dark-theme');
-    localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
-});
+const toggleTheme =() => {
+    const temaActual = document.body.classList.getAttribute('data-theme');
+    if(temaActual==='dark'){
+        document.body.removeAttribute('data-theme');
+        console.log('Tema cambiado a claro');
+    }else{
+        document.body.setAttribute('data-theme','dark');
+        console.log('Tema cambiado a oscuro');
+    }
+}
+themeToggle.addEventListener('click', toggleTheme);
+console.log('Tema inicializado');
 
 const moviesgrid = document.getElementById('movies-grid');
 const loadingDiv = document.getElementById('loading');
