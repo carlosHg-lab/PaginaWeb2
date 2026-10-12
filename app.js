@@ -2,6 +2,13 @@ const API_KEY = 'a51df9b01c944c22d31e89e81d80a907';
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
+const themeToggle = document.getElementById('theme-toggle');
+themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark-theme');
+    const isDarkTheme = document.body.classList.contains('dark-theme');
+    localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
+});
+
 const moviesgrid = document.getElementById('movies-grid');
 const loadingDiv = document.getElementById('loading');
 const errorDiv = document.getElementById('error');
