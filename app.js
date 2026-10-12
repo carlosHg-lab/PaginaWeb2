@@ -7,6 +7,30 @@ const loadingDiv = document.getElementById('loading');
 const errorDiv = document.getElementById('error');
 const errorMessage = document.getElementById('error-message');
 
+const searchInput = document.getElemenById('search');
+let timesoutBusqueda=null;
+searchInput.addEventListener('input',(evento)=>{
+    const texto=evento.target.value;
+        clearTimeout(timesoutBusqueda);
+        timesoutBusqueda=setTimeout(async()=>{
+            console.log(`Buscando películas con el texto: ${texto}`);
+            mostrarLoading();
+            try{
+                const peliculas=await buscarPeliculas(texto);
+                ocultarLoading();
+                if(peliculas.length===0){
+                    moviesgrid.innerHTML=`<p>No se encontraron películas: ${texto}</p>`;
+                    return;
+                }
+                moviesgrid.innerHTML=peliculas.map(crearTarjeta).join('');
+                console.log(`${peliculas.length} resultados: ${texto}`);
+            }catch(error){
+                console.error('Error al buscar:',error);
+                mostrarError('Error al buscar películas. Intenta de nuevo');
+            }
+        },500);
+    });
+
 const ObtenerPeliculas = async () => {
     const url = `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=es-ES`;
     const respuesta = await fetch(url);
@@ -40,6 +64,23 @@ const crearTarjeta = (pelicula) => {
     `;
 }
 
+const buscarPeliculas = async (texto) => {
+    if(!texto || texto.trim()===''){
+        return obtenerPeliculas();
+    }
+
+    const query = encodeURIComponent(texto.trim());
+    const url = `${BASE_URL}/search/movie?api_key=${API_KEY}&language=es-ES&query=${query}`;
+    const respuesta = await fetch(url);
+
+    if (!respuesta.ok) {
+        throw new Error(`Error HTTP: ${respuesta.status}`);
+    }
+
+    const datos = await respuesta.json();
+    return datos.results;
+}
+
 const mostrarLoading = () => {
     loadingDiv.style.display = 'flex';
     errorDiv.style.display = 'none';
@@ -56,6 +97,7 @@ const mostrarError = (mensaje) => {
     errorDiv.style.display = 'flex';
     moviesgrid.innerHTML = '';
 }
+
 
 const iniciar = async () => {
     console.log('Mostrar película');
